@@ -3,8 +3,8 @@ SRC = main.c
 OBJ = ${SRC:.c=.o}
 
 CC = cc
-INCS = -l/usr/include/X11
-LIBS = -lX11
+INCS = -l/usr/include/X11 `pkg-config --cflags xft`
+LIBS = -lX11 -lXft
 
 LDFLAGS = ${LIBS}
 CFLAGS = -Wall -Wextra ${INCS}
