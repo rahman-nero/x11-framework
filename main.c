@@ -10,21 +10,40 @@
 #include <X11/XKBlib.h>
 #include <X11/Xft/Xft.h>
 
-// Display server connenction
-static Display *dpy;
-// Screen number
-static int scr;
-static Window root;
-static Visual *vis;
-
 #define POSX 500
 #define POSY 500
 #define WIDTH 500
 #define HEIGHT 500
 #define BORDER 15
 #define LINE 4
-#define TITLE "Paint programm"
-#define BLACK "#000000"
+#define TITLE "Paint program"
+#define BL "#0000ff"
+#define GR "#00ff00"
+#define RE "#ff0000"
+
+#define CHILD_W 50
+#define CHILD_H 50
+#define CHILD_B 1
+
+
+enum {
+    BLUE, GREEN, RED
+};
+
+typedef struct {
+    Window win;
+    XftColor *color;
+} ColorButtons;
+
+
+// Display server connenction
+static Display *dpy;
+// Screen number
+static int scr;
+static Window root;
+static Visual *vis;
+static ColorButtons colorButtons[3];
+static const char *colors[3] = {BL, GR, RE};
 
 static void create_color(XftColor *color, const char *name) {
     if (!XftColorAllocName(dpy, vis, DefaultColormap(dpy, scr), name, color)) {
@@ -34,22 +53,31 @@ static void create_color(XftColor *color, const char *name) {
     // color->pixel != 0xff << 24;
 }
 
-static Window create_win(const int x, const int y, const int w, const int h, const int b) {
+static Window create_win(const int x, const int y, const int w, const int h, const int b, Window *parent, int idx) {
     Window win;
     XSetWindowAttributes xwa = {
             .background_pixel = WhitePixel(dpy, scr),
             .border_pixel = BlackPixel(dpy, scr),
     };
 
-    xwa.event_mask = Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask;
+    if (!parent) {
+        xwa.event_mask = Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask;
 
-    win = XCreateWindow(dpy, root, x, y, w, h, b, DefaultDepth(dpy, scr), InputOutput, vis,
-                        CWBackPixel | CWEventMask | CWBorderPixel, &xwa);
+        win = XCreateWindow(dpy, root, x, y, w, h, b, DefaultDepth(dpy, scr), InputOutput, vis,
+                            CWBackPixel | CWEventMask | CWBorderPixel, &xwa);
+
+    } else {
+        xwa.event_mask = ButtonPressMask;
+        xwa.background_pixel = colorButtons[idx].color->pixel;
+
+        win = XCreateWindow(dpy, *parent, x, y, w, h, b, DefaultDepth(dpy, scr), InputOutput, vis,
+                            CWBackPixel | CWEventMask | CWBorderPixel, &xwa);
+    }
 
     return win;
 }
 
-static GC create_gc(int line_width, XftColor *fg) {
+static GC create_gc(int line_width) {
     GC gc;
     XGCValues xgcValues;
 
@@ -60,7 +88,7 @@ static GC create_gc(int line_width, XftColor *fg) {
     xgcValues.cap_style = CapButt;
     xgcValues.join_style = JoinMiter;
     xgcValues.fill_style = FillSolid;
-    xgcValues.foreground = fg->pixel;
+    xgcValues.foreground = BlackPixel(dpy, scr);
     xgcValues.background = WhitePixel(dpy, scr);
 
     valueMask = GCForeground | GCBackground | GCFillStyle | GCLineStyle | GCLineWidth | GCCapStyle | GCJoinStyle;
@@ -70,7 +98,7 @@ static GC create_gc(int line_width, XftColor *fg) {
     return gc;
 }
 
-static void run(GC gc, XftColor *color) {
+static void run(GC gc) {
     XEvent ev;
 
     int init = 0;
@@ -84,9 +112,18 @@ static void run(GC gc, XftColor *color) {
         switch (ev.type) {
             case ButtonPress:
                 if (ev.xbutton.button == Button1) {
-                    // Drawing a point
-                    XDrawPoint(dpy, ev.xbutton.window, gc, ev.xbutton.x, ev.xbutton.y);
+                    if (ev.xbutton.window == colorButtons[RED].win) {
+                        XSetForeground(dpy, gc, colorButtons[RED].color->pixel);
+                    } else if (ev.xbutton.window == colorButtons[BLUE].win) {
+                        XSetForeground(dpy, gc, colorButtons[BLUE].color->pixel);
+                    } else if (ev.xbutton.window == colorButtons[GREEN].win) {
+                        XSetForeground(dpy, gc, colorButtons[GREEN].color->pixel);
+                    } else {
+                        // Drawing a point
+                        XDrawPoint(dpy, ev.xbutton.window, gc, ev.xbutton.x, ev.xbutton.y);
+                    }
                 }
+
                 break;
 
                 // If we drag our mouse in clicked state (as mousepress in js)
@@ -117,24 +154,24 @@ static void run(GC gc, XftColor *color) {
                     XClearWindow(dpy, ev.xbutton.window);
                 }
 
-                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_1) {
-                    create_color(color, "#000000");
-                    XSetForeground(dpy, gc, color->pixel);
-                }
-
-                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_2) {
-                    create_color(color, "#ff0000");
-                    XSetForeground(dpy, gc, color->pixel);
-                }
-
-                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_3) {
-                    create_color(color, "#008000");
-                    XSetForeground(dpy, gc, color->pixel);
-                }
-                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_4) {
-                    create_color(color, "#ffa000");
-                    XSetForeground(dpy, gc, color->pixel);
-                }
+//                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_1) {
+//                    create_color(color, "#000000");
+//                    XSetForeground(dpy, gc, color->pixel);
+//                }
+//
+//                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_2) {
+//                    create_color(color, "#ff0000");
+//                    XSetForeground(dpy, gc, color->pixel);
+//                }
+//
+//                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_3) {
+//                    create_color(color, "#008000");
+//                    XSetForeground(dpy, gc, color->pixel);
+//                }
+//                if (XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, 0) == XK_4) {
+//                    create_color(color, "#ffa000");
+//                    XSetForeground(dpy, gc, color->pixel);
+//                }
 
                 break;
         }
@@ -149,7 +186,7 @@ int main() {
 
     dpy = XOpenDisplay(NULL);
     GC gc;
-    XftColor *color = malloc(sizeof(XftColor));
+    int y = 0;
 
     if (dpy == NULL) {
         errx(1, "Can't open display");
@@ -161,27 +198,47 @@ int main() {
     vis = DefaultVisual(dpy, scr);
 
     // Creating our simple window
-    main_win = create_win(POSX, POSY, WIDTH, HEIGHT, BORDER);
+    main_win = create_win(POSX, POSY, WIDTH, HEIGHT, BORDER, NULL, 0);
 
-    // Setting color as black
-    create_color(color, BLACK);
+    for (int i = 0; i < 3; ++i) {
+        colorButtons[i].color = malloc(sizeof(XftColor));
+        if (!colorButtons[i].color) {
+            errx(1, "Can't allocate memory for color");
+        }
 
-    gc = create_gc(LINE, color);
+        if (!XftColorAllocName(dpy, vis, DefaultColormap(dpy, scr), colors[i], colorButtons[i].color)) {
+            errx(1, "Can't allocate xft color");
+        }
+
+        colorButtons[i].win = create_win(0, y, CHILD_W, CHILD_W, CHILD_B, &main_win, i);
+
+        // Each time increase margins between windows
+        y += CHILD_H + CHILD_B;
+    }
+
+    gc = create_gc(LINE);
 
     // Setting Title
     XStoreName(dpy, main_win, TITLE);
 
     // Mapping window to display server
     XMapWindow(dpy, main_win);
+    XMapSubwindows(dpy, main_win);
 
-    run(gc, color);
+    run(gc);
 
     // Unmap window
     XUnmapWindow(dpy, main_win);
+    XUnmapSubwindows(dpy, main_win);
     // Freeing resources
     XDestroyWindow(dpy, main_win);
+    XDestroySubwindows(dpy, main_win);
     XFreeGC(dpy, gc);
-    XftColorFree(dpy, vis, DefaultColormap(dpy, scr), color);
+
+    for (int i = 0; i < 3; ++i) {
+        XftColorFree(dpy, vis, DefaultColormap(dpy, scr), colorButtons[i].color);
+    }
+
     // Close connection with display
     XCloseDisplay(dpy);
 
