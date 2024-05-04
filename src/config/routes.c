@@ -1,12 +1,9 @@
 #include <string.h>
 #include <err.h>
-#include <stdio.h>
-#include "../pages/index.h"
-#include <X11/X.h>
-#include <X11/Xlib.h>
+#include "../pages/main.h"
+#include "../config/config.h"
 
-
-typedef Window (*FunctionCallback)(XEvent XEvent);
+typedef struct MainWin* (*FunctionCallback)();
 
 char *route_names[10];
 FunctionCallback route_calls[10];
@@ -16,7 +13,7 @@ size_t used_cells = 0;
  * Register routes
  * */
 void registerRoutes() {
-    Window (*index_callback)(XEvent XEvent) = index_run;
+    struct MainWin* (*index_callback)() = main_run;
 
     route_names[0] = "/main";
     route_calls[0] = index_callback;
@@ -28,11 +25,10 @@ void registerRoutes() {
 /**
  * Look for route and call matched route. Return Null otherwise
  * */
-Window matchRoute(const char *route, XEvent event) {
-
+struct MainWin* matchRoute(const char *route) {
     for (int i = 0; i < used_cells; i++) {
         if(strcasecmp(route, route_names[i]) == 0) {
-            return route_calls[i](event);
+            return route_calls[i]();
         }
     }
 

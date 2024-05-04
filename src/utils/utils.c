@@ -34,12 +34,14 @@ Window create_main_window(
     };
 
     if (masks == 0) {
-        windowAttributes.event_mask = Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask;
+        windowAttributes.event_mask =
+                Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask;
     } else {
         windowAttributes.event_mask = masks;
     }
 
-    win = XCreateWindow(config.dpy, config.root, x, y, width, height, border, DefaultDepth(config.dpy, config.scr), InputOutput, config.vis,
+    win = XCreateWindow(config.dpy, config.root, x, y, width, height, border, DefaultDepth(config.dpy, config.scr),
+                        InputOutput, config.vis,
                         CWBackPixel | CWEventMask | CWBorderPixel, &windowAttributes);
 
     return win;
@@ -55,22 +57,37 @@ Window create_sub_window(
         const int width,
         const int height,
         const int border,
-        const int masks
+        const int masks,
+        const char *background_hex
 ) {
     Window win;
 
+    // Allocation memory for color
+    XftColor *color = (XftColor *) malloc(sizeof(XftColor));
+
+    if (color == NULL) {
+        errx(1, "Can't allocate memory for color");
+    }
+
+    // Assign hex color to allocated memory
+    if (!XftColorAllocName(config.dpy, config.vis, DefaultColormap(config.dpy, config.scr), background_hex, color)) {
+        errx(1, "Can't allocate xft color");
+    }
+
     XSetWindowAttributes windowAttributes = {
-            .background_pixel = WhitePixel(config.dpy, config.scr),
+            .background_pixel = color->pixel,
             .border_pixel = BlackPixel(config.dpy, config.scr),
     };
 
     if (masks == 0) {
-        windowAttributes.event_mask = Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask;
+        windowAttributes.event_mask =
+                Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask;
     } else {
         windowAttributes.event_mask = masks;
     }
 
-    win = XCreateWindow(config.dpy, *parent, x, y, width, height, border, DefaultDepth(config.dpy, config.scr), InputOutput, config.vis,
+    win = XCreateWindow(config.dpy, *parent, x, y, width, height, border, DefaultDepth(config.dpy, config.scr),
+                        InputOutput, config.vis,
                         CWBackPixel | CWEventMask | CWBorderPixel, &windowAttributes);
 
     return win;

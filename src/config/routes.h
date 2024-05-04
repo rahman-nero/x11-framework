@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../config/config.h"
 
 void registerRoutes();
 
-Window matchRoute(const char *route, XEvent event) ;
+struct MainWin* matchRoute(const char *route);

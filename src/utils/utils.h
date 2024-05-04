@@ -23,7 +23,8 @@ Window create_sub_window(
         const int width,
         const int height,
         const int border,
-        const int masks
+        const int masks,
+        const char *background_hex
 );
 
 /**
