@@ -23,7 +23,7 @@ Window create_main_window(
     Window win;
 
     XSetWindowAttributes windowAttributes = {
-            .background_pixel = 0x00FFFF00,
+            .background_pixel = 0x00FFFFFF,
             .border_pixel = BlackPixel(config.dpy, config.scr),
     };
 

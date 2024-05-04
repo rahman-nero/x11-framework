@@ -88,12 +88,12 @@ static void run() {
                         NeroWindow *matchedWindow = waitingExpose[i];
 
                         // If exposed window and selected window is equal, then draw text
-                        if (exposedWindow == matchedWindow->window) {
+                        if (exposedWindow == matchedWindow->window && matchedWindow->string != NULL) {
                             XDrawString(config.dpy,
                                         matchedWindow->window,
                                         config.gc,
-                                        matchedWindow->string->x,
-                                        matchedWindow->string->y,
+                                        matchedWindow->string->x ,
+                                        matchedWindow->string->y + 10,
                                         matchedWindow->string->string,
                                         matchedWindow->string->length
                             );
