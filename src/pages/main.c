@@ -13,29 +13,24 @@ NeroWindow *main_run() {
     mainWin->config.border_width = 0;
     mainWin->config.border_color = 0;
     mainWin->config.background = 0x00324EFF;
+    mainWin->string = NULL;
+
+    // String
+    NeroString *subWindowString = (NeroString *) malloc(sizeof(NeroString));
+    subWindowString->x = 5;
+    subWindowString->y = 5;
+    subWindowString->string = "Hello";
+    subWindowString->length = 5;
 
     NeroWindow *subWindow = (NeroWindow *) malloc(sizeof(NeroWindow));
-    subWindow->config.width = 40;
-    subWindow->config.height = 40;
+    subWindow->config.width = 700;
+    subWindow->config.height = 70;
     subWindow->config.x = 0;
     subWindow->config.y = 0;
     subWindow->config.border_width = 0;
     subWindow->config.border_color = 0;
     subWindow->config.background = 0x00F9F9F9;
-
-    //
-//    struct SubWindow *subSubWindow = (struct SubWindow*) malloc(sizeof(struct SubWindow));
-//    subSubWindow->config.w = 50;
-//    subSubWindow->config.h = 50;
-//    subSubWindow->config.x = 10;
-//    subSubWindow->config.y = 10;
-//    subSubWindow->config.b = 0;
-//    subSubWindow->config.background_hex = "#f9f9f9";
-//    subSubWindow->sub_window_size = 0;
-//
-//
-//    subWindow->sub_windows[0] = subSubWindow;
-//    subWindow->sub_window_size = 1;
+    subWindow->string = subWindowString;
 
     mainWin->subWindows[0] = subWindow;
     mainWin->subWindowSize = 1;

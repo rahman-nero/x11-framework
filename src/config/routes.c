@@ -7,7 +7,7 @@ typedef NeroWindow *(*FunctionCallback)();
 
 const char *routePaths[10];
 FunctionCallback routeControllers[10];
-size_t used_cells = 0;
+size_t routeCount = 0;
 
 /**
  * Function to add route to route list
@@ -16,9 +16,9 @@ size_t used_cells = 0;
  * @return void
  * */
 void addRoute(char *path, NeroWindow *(*callback)()) {
-    routePaths[0] = path;
-    routeControllers[0] = callback;
-    used_cells = 1;
+    routePaths[routeCount] = path;
+    routeControllers[routeCount] = callback;
+    routeCount += 1;
 }
 
 /**
@@ -32,7 +32,7 @@ void registerRoutes() {
  * Look for route and call matched route. Return Null otherwise
  * */
 NeroWindow *matchRoute(const char *route) {
-    for (int i = 0; i < used_cells; i++) {
+    for (int i = 0; i < routeCount; i++) {
         if (strcasecmp(route, routePaths[i]) == 0) {
             return routeControllers[i]();
         }

@@ -12,6 +12,10 @@
 
 NeroConfig config;
 
+// Windows which waits until expose event is dispatched
+NeroWindow *waitingExpose[10];
+size_t waitingExposeCount = 0;
+
 void mappingWindows(NeroWindow *currentWin, const Window *parentWin) {
     Window win = create_sub_window(
             parentWin,
@@ -25,23 +29,32 @@ void mappingWindows(NeroWindow *currentWin, const Window *parentWin) {
     );
 
     XMapWindow(config.dpy, win);
+    currentWin->window = win;
+
+    if (currentWin->string != NULL) {
+        waitingExpose[0] = currentWin;
+        waitingExposeCount += 1;
+    }
 
     if (currentWin->subWindowSize > 0) {
         for (int i = 0; i < currentWin->subWindowSize; i++) {
-            NeroWindow subWindow = *(NeroWindow *) currentWin->subWindows[i];
-            mappingWindows(&subWindow, &win);
+            NeroWindow *subWindow = (NeroWindow *) currentWin->subWindows[i];
+            mappingWindows(subWindow, &win);
         }
     }
 }
 
 static void run() {
+    // Current route
     char *route = "/main";
 
+    // Result of matching route
     NeroWindow *result = matchRoute(route);
 
     mappingWindows(result, &config.mainWin);
 
     XEvent ev;
+
     while (XNextEvent(config.dpy, &ev) == 0) {
         switch (ev.type) {
             case ButtonPress:
@@ -67,6 +80,26 @@ static void run() {
                 break;
 
             case Expose:
+                Window exposedWindow = ev.xany.window;
+
+                if (waitingExposeCount > 0) {
+                    for (size_t i = 0; i < waitingExposeCount; i++) {
+                        // Selected window
+                        NeroWindow *matchedWindow = waitingExpose[i];
+
+                        // If exposed window and selected window is equal, then draw text
+                        if (exposedWindow == matchedWindow->window) {
+                            XDrawString(config.dpy,
+                                        matchedWindow->window,
+                                        config.gc,
+                                        matchedWindow->string->x,
+                                        matchedWindow->string->y,
+                                        matchedWindow->string->string,
+                                        matchedWindow->string->length
+                            );
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -88,7 +121,7 @@ int main() {
     config.displayWidth = DisplayWidth(config.dpy, config.scr);
     config.displayHeight = DisplayHeight(config.dpy, config.scr);
 
-    printf("Weight: %d and Height: %d \n", config.displayWidth, config.displayHeight);
+//    printf("Weight: %d and Height: %d \n", config.displayWidth, config.displayHeight);
 
     // Register Routes
     registerRoutes();
@@ -113,7 +146,6 @@ int main() {
     XSetFont(config.dpy, config.gc, font->fid);
 
     run();
-
 
     // Freeing resources
     XDestroyWindow(dpy, config.mainWin);

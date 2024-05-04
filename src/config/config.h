@@ -6,6 +6,7 @@
 
 typedef unsigned long NeroBorderColor;
 typedef unsigned long NeroBackgroundColor;
+typedef unsigned long NeroStringColor;
 
 typedef struct {
     // Display server connection
@@ -59,10 +60,40 @@ typedef struct {
 } NeroWindowConfig;
 
 
-typedef struct NeroWindow {
+typedef struct {
+    // Position from left to right
+    u_int16_t x;
+
+    // Position from top to bottom
+    u_int16_t y;
+
+    // String
+    char *string;
+
+    // Length of Text
+    u_int16_t length;
+} NeroString;
+
+
+typedef struct NeroWindow{
+    // Filled when window has been created
+    Window window;
+
+    // Config
     NeroWindowConfig config;
+
+    // String
+    NeroString* string;
+
+    // Color of text
+    NeroStringColor color;
+
+    // Sub windows
     struct NeroWindow *subWindows[127];
+
+    // Count of windows
     u_int8_t subWindowSize;
 } NeroWindow;
 
 #endif //NERO_CONFIG_CONFIG_H
+

@@ -1,17 +1,11 @@
-//
-// Created by nero on 5/1/24.
-//
-
-#include "utils.h"
 #include <X11/X.h>
-#include "../config/config.h"
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/XKBlib.h>
 #include <X11/Xft/Xft.h>
+#include "utils.h"
+#include "../config/config.h"
 
 extern NeroConfig config;
 
@@ -123,8 +117,8 @@ GC create_gc(const Window *window) {
     xgcValues.cap_style = CapButt;
     xgcValues.join_style = JoinMiter;
     xgcValues.fill_style = FillSolid;
-    xgcValues.foreground = WhitePixel(config.dpy, config.scr);
-    xgcValues.background = WhitePixel(config.dpy, config.scr);
+    xgcValues.foreground = BlackPixel(config.dpy, config.scr);
+    xgcValues.background = BlackPixel(config.dpy, config.scr);
 
     valueMask = GCForeground | GCBackground | GCFillStyle | GCLineStyle | GCCapStyle | GCJoinStyle | GCLineWidth;
 
