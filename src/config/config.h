@@ -26,7 +26,7 @@ typedef struct {
     GC gc;
 
     // Display Width
-    // If you have 3 monitors, it will be considered as one here.
+    // NOTE: If you have 3 monitors, it will be considered as one here.
     // So you will get around 5760 in this property
     u_int16_t width;
 
@@ -40,7 +40,8 @@ struct WindowConfig {
     int w;
     int h;
     int b;
-    char *background_hex;
+    // RGB
+    unsigned long background;
 };
 
 struct SubWindow {

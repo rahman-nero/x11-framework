@@ -29,7 +29,7 @@ Window create_main_window(
     Window win;
 
     XSetWindowAttributes windowAttributes = {
-            .background_pixel = WhitePixel(config.dpy, config.scr),
+            .background_pixel = 0x00FFFF00,
             .border_pixel = BlackPixel(config.dpy, config.scr),
     };
 
@@ -58,24 +58,12 @@ Window create_sub_window(
         const int height,
         const int border,
         const int masks,
-        const char *background_hex
+        const unsigned long background
 ) {
     Window win;
 
-    // Allocation memory for color
-    XftColor *color = (XftColor *) malloc(sizeof(XftColor));
-
-    if (color == NULL) {
-        errx(1, "Can't allocate memory for color");
-    }
-
-    // Assign hex color to allocated memory
-    if (!XftColorAllocName(config.dpy, config.vis, DefaultColormap(config.dpy, config.scr), background_hex, color)) {
-        errx(1, "Can't allocate xft color");
-    }
-
     XSetWindowAttributes windowAttributes = {
-            .background_pixel = color->pixel,
+            .background_pixel = background,
             .border_pixel = BlackPixel(config.dpy, config.scr),
     };
 

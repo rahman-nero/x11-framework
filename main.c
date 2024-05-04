@@ -13,60 +13,15 @@
 
 Config config;
 
-void recursiveMappingSubWindow(struct SubWindow *controller, const Window *rootWin) {
-    Window win = create_sub_window(
-            rootWin,
-            controller->config.x,
-            controller->config.y,
-            controller->config.w,
-            controller->config.h,
-            controller->config.b,
-            0,
-            controller->config.background_hex
-    );
-
-    printf("SubWin: %lu, root: %lu, x: %d, :y: %d, sub_size: %d \r\n", win, *rootWin, controller->config.x,
-           controller->config.y, controller->sub_window_size);
-
-
-    XMapWindow(config.dpy, win);
-
-    if (controller->sub_window_size > 0) {
-        for (int i = 0; i < controller->sub_window_size; i++) {
-            struct SubWindow subWindow = *(struct SubWindow *) controller->sub_windows[i];
-            recursiveMappingSubWindow(&subWindow, &win);
-        }
-    }
-
-}
-
 void runMapping(struct MainWin *mainWin, const Window *rootWin);
-
-
-Window create_win(const int x, const int y, const int w, const int h, const int b) {
-    Window win;
-
-    XSetWindowAttributes xwa = {
-            .background_pixel = WhitePixel(config.dpy, config.scr),
-            .border_pixel = BlackPixel(config.dpy, config.scr),
-    };
-
-    xwa.event_mask = Button1MotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask;
-
-    win = XCreateWindow(config.dpy, config.root, x, y, w, h, b, DefaultDepth(config.dpy, config.scr), InputOutput,
-                        config.vis,
-                        CWBackPixel | CWEventMask | CWBorderPixel, &xwa);
-
-    return win;
-}
-
+void recursiveMappingSubWindow(struct SubWindow *controller, const Window *rootWin);
 
 static void run() {
     char *route = "/main";
 
-    struct MainWin *controller = matchRoute(route);
+    struct MainWin *outPut = matchRoute(route);
 
-    runMapping(controller, &config.mainWin);
+    runMapping(outPut, &config.mainWin);
 
     XEvent ev;
     while (XNextEvent(config.dpy, &ev) == 0) {
@@ -99,6 +54,7 @@ static void run() {
     }
 }
 
+
 void runMapping(struct MainWin *mainWin, const Window *rootWin) {
     Window win = create_sub_window(
             rootWin,
@@ -108,13 +64,10 @@ void runMapping(struct MainWin *mainWin, const Window *rootWin) {
             mainWin->config.h,
             mainWin->config.b,
             0,
-            mainWin->config.background_hex
+            mainWin->config.background
     );
 
     XMapWindow(config.dpy, win);
-
-    printf("Root: %lu, New Win: %lu, x: %d, :y: %d, sub_size: %d \r\n", *rootWin, win, mainWin->config.x,
-           mainWin->config.y, mainWin->sub_window_size);
 
     if (mainWin->sub_window_size > 0) {
         for (int i = 0; i < mainWin->sub_window_size; i++) {
@@ -124,6 +77,28 @@ void runMapping(struct MainWin *mainWin, const Window *rootWin) {
     }
 }
 
+void recursiveMappingSubWindow(struct SubWindow *controller, const Window *rootWin) {
+    Window win = create_sub_window(
+            rootWin,
+            controller->config.x,
+            controller->config.y,
+            controller->config.w,
+            controller->config.h,
+            controller->config.b,
+            0,
+            controller->config.background
+    );
+
+    XMapWindow(config.dpy, win);
+
+    if (controller->sub_window_size > 0) {
+        for (int i = 0; i < controller->sub_window_size; i++) {
+            struct SubWindow subWindow = *(struct SubWindow *) controller->sub_windows[i];
+            recursiveMappingSubWindow(&subWindow, &win);
+        }
+    }
+
+}
 
 int main() {
 
@@ -146,8 +121,7 @@ int main() {
     registerRoutes();
 
     // Creating our main window
-    config.mainWin = create_win(0, 0, 1920, 950,
-                                BORDER);
+    config.mainWin = create_main_window(0, 0, 1920, config.height, BORDER, 0);
 
     // Creating Graphic context
     config.gc = create_gc(&config.mainWin);
