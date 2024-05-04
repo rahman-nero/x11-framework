@@ -1,6 +1,3 @@
-//
-// Created by nero on 4/15/24.
-//
 #include <X11/X.h>
 #include <err.h>
 #include <stdio.h>
@@ -11,17 +8,38 @@
 #include "./src/config/config.h"
 #include "./src/utils/utils.h"
 
-Config config;
+#define TITLE "Application"
 
-void runMapping(struct MainWin *mainWin, const Window *rootWin);
-void recursiveMappingSubWindow(struct SubWindow *controller, const Window *rootWin);
+NeroConfig config;
+
+void mappingWindows(NeroWindow *currentWin, const Window *parentWin) {
+    Window win = create_sub_window(
+            parentWin,
+            currentWin->config.x,
+            currentWin->config.y,
+            currentWin->config.width,
+            currentWin->config.height,
+            currentWin->config.border_width,
+            0,
+            currentWin->config.background
+    );
+
+    XMapWindow(config.dpy, win);
+
+    if (currentWin->subWindowSize > 0) {
+        for (int i = 0; i < currentWin->subWindowSize; i++) {
+            NeroWindow subWindow = *(NeroWindow *) currentWin->subWindows[i];
+            mappingWindows(&subWindow, &win);
+        }
+    }
+}
 
 static void run() {
     char *route = "/main";
 
-    struct MainWin *outPut = matchRoute(route);
+    NeroWindow *result = matchRoute(route);
 
-    runMapping(outPut, &config.mainWin);
+    mappingWindows(result, &config.mainWin);
 
     XEvent ev;
     while (XNextEvent(config.dpy, &ev) == 0) {
@@ -55,51 +73,6 @@ static void run() {
 }
 
 
-void runMapping(struct MainWin *mainWin, const Window *rootWin) {
-    Window win = create_sub_window(
-            rootWin,
-            mainWin->config.x,
-            mainWin->config.y,
-            mainWin->config.w,
-            mainWin->config.h,
-            mainWin->config.b,
-            0,
-            mainWin->config.background
-    );
-
-    XMapWindow(config.dpy, win);
-
-    if (mainWin->sub_window_size > 0) {
-        for (int i = 0; i < mainWin->sub_window_size; i++) {
-            struct SubWindow subWindow = *(struct SubWindow *) mainWin->sub_windows[i];
-            recursiveMappingSubWindow(&subWindow, &win);
-        }
-    }
-}
-
-void recursiveMappingSubWindow(struct SubWindow *controller, const Window *rootWin) {
-    Window win = create_sub_window(
-            rootWin,
-            controller->config.x,
-            controller->config.y,
-            controller->config.w,
-            controller->config.h,
-            controller->config.b,
-            0,
-            controller->config.background
-    );
-
-    XMapWindow(config.dpy, win);
-
-    if (controller->sub_window_size > 0) {
-        for (int i = 0; i < controller->sub_window_size; i++) {
-            struct SubWindow subWindow = *(struct SubWindow *) controller->sub_windows[i];
-            recursiveMappingSubWindow(&subWindow, &win);
-        }
-    }
-
-}
-
 int main() {
 
     Display *dpy = XOpenDisplay(NULL);
@@ -112,16 +85,16 @@ int main() {
     config.scr = DefaultScreen(config.dpy);
     config.root = RootWindow(config.dpy, config.scr);
     config.vis = DefaultVisual(config.dpy, config.scr);
-    config.width = DisplayWidth(config.dpy, config.scr);
-    config.height = DisplayHeight(config.dpy, config.scr);
+    config.displayWidth = DisplayWidth(config.dpy, config.scr);
+    config.displayHeight = DisplayHeight(config.dpy, config.scr);
 
-    printf("Weight: %d and Height: %d \n", config.width, config.height);
+    printf("Weight: %d and Height: %d \n", config.displayWidth, config.displayHeight);
 
     // Register Routes
     registerRoutes();
 
     // Creating our main window
-    config.mainWin = create_main_window(0, 0, 1920, config.height, BORDER, 0);
+    config.mainWin = create_main_window(0, 0, 1920, config.displayHeight, 0, 0);
 
     // Creating Graphic context
     config.gc = create_gc(&config.mainWin);
@@ -141,9 +114,6 @@ int main() {
 
     run();
 
-    // Unmap window
-    XUnmapWindow(dpy, config.mainWin);
-    XUnmapSubwindows(dpy, config.mainWin);
 
     // Freeing resources
     XDestroyWindow(dpy, config.mainWin);

@@ -1,28 +1,29 @@
 #include "../utils/utils.h"
 #include "../config/config.h"
 
-extern Config config;
+extern NeroConfig config;
 
-struct MainWin* main_run() {
+NeroWindow *main_run() {
 
-    struct MainWin *mainWin = (struct MainWin*) malloc(sizeof(struct MainWin));
-    mainWin->config.w = 1920;
-    mainWin->config.h = 70;
+    NeroWindow *mainWin = (NeroWindow *) malloc(sizeof(NeroWindow));
+    mainWin->config.width = 1920;
+    mainWin->config.height = 70;
     mainWin->config.x = 0;
     mainWin->config.y = 0;
-    mainWin->config.b = 0;
-    mainWin->config.background =  0x00324EFF;
-    mainWin->sub_window_size = 0;
+    mainWin->config.border_width = 0;
+    mainWin->config.border_color = 0;
+    mainWin->config.background = 0x00324EFF;
 
-    struct SubWindow *subWindow = (struct SubWindow*) malloc(sizeof(struct SubWindow));
-    subWindow->config.w = 40;
-    subWindow->config.h = 40;
+    NeroWindow *subWindow = (NeroWindow *) malloc(sizeof(NeroWindow));
+    subWindow->config.width = 40;
+    subWindow->config.height = 40;
     subWindow->config.x = 0;
     subWindow->config.y = 0;
-    subWindow->config.b = 0;
+    subWindow->config.border_width = 0;
+    subWindow->config.border_color = 0;
     subWindow->config.background = 0x00F9F9F9;
-    subWindow->sub_window_size = 0;
-//
+
+    //
 //    struct SubWindow *subSubWindow = (struct SubWindow*) malloc(sizeof(struct SubWindow));
 //    subSubWindow->config.w = 50;
 //    subSubWindow->config.h = 50;
@@ -36,8 +37,8 @@ struct MainWin* main_run() {
 //    subWindow->sub_windows[0] = subSubWindow;
 //    subWindow->sub_window_size = 1;
 
-    mainWin->sub_windows[0] = subWindow;
-    mainWin->sub_window_size = 1;
+    mainWin->subWindows[0] = subWindow;
+    mainWin->subWindowSize = 1;
 
     return mainWin;
 }

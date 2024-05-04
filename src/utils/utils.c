@@ -13,7 +13,7 @@
 #include <X11/XKBlib.h>
 #include <X11/Xft/Xft.h>
 
-extern Config config;
+extern NeroConfig config;
 
 /**
  * Create main window from parent

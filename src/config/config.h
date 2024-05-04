@@ -1,10 +1,11 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
-#ifndef FIRST_PROJECT_CONFIG_H
-#define FIRST_PROJECT_CONFIG_H
-#define BORDER 0
-#define TITLE "Paint program"
+#ifndef NERO_CONFIG_CONFIG_H
+#define NERO_CONFIG_CONFIG_H
+
+typedef unsigned long NeroBorderColor;
+typedef unsigned long NeroBackgroundColor;
 
 typedef struct {
     // Display server connection
@@ -13,7 +14,7 @@ typedef struct {
     // Screen number
     int scr;
 
-    // Root window
+    // Root window (doesn't show up)
     Window root;
 
     // Visual
@@ -22,39 +23,46 @@ typedef struct {
     // Main Win
     Window mainWin;
 
-    // Main Graphic context
+    // Graphic context to be able to write something (with text)
     GC gc;
 
-    // Display Width
+    // Current display Width
     // NOTE: If you have 3 monitors, it will be considered as one here.
-    // So you will get around 5760 in this property
+    // So you will get around 5760 in this property, so be aware of it
+    u_int16_t displayWidth;
+
+    // Current display Height
+    u_int16_t displayHeight;
+} NeroConfig;
+
+typedef struct {
+    // Position from left to right
+    u_int16_t x;
+
+    // Position from top to bottom
+    u_int16_t y;
+
+    // Width of window
     u_int16_t width;
 
-    // Display Height
+    // Height of window
     u_int16_t height;
-} Config;
 
-struct WindowConfig {
-    int x;
-    int y;
-    int w;
-    int h;
-    int b;
-    // RGB
-    unsigned long background;
-};
+    // Border
+    int border_width;
 
-struct SubWindow {
-    struct WindowConfig config;
-    void *sub_windows[127];
-    u_int8_t sub_window_size;
-};
+    // Border color (RGB). Example: 0x00FFFFFF - white
+    NeroBorderColor border_color;
 
-struct MainWin {
-    struct WindowConfig config;
-    void *sub_windows[127];
-    u_int8_t sub_window_size;
-};
+    // Background color based on RGB. Example: 0x00FF0000 - red
+    NeroBackgroundColor background;
+} NeroWindowConfig;
 
 
-#endif //FIRST_PROJECT_CONFIG_H
+typedef struct NeroWindow {
+    NeroWindowConfig config;
+    struct NeroWindow *subWindows[127];
+    u_int8_t subWindowSize;
+} NeroWindow;
+
+#endif //NERO_CONFIG_CONFIG_H

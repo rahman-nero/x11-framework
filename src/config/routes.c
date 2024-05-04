@@ -3,32 +3,38 @@
 #include "../pages/main.h"
 #include "../config/config.h"
 
-typedef struct MainWin* (*FunctionCallback)();
+typedef NeroWindow *(*FunctionCallback)();
 
-char *route_names[10];
-FunctionCallback route_calls[10];
+const char *routePaths[10];
+FunctionCallback routeControllers[10];
 size_t used_cells = 0;
+
+/**
+ * Function to add route to route list
+ * @param path
+ * @param Callback callback
+ * @return void
+ * */
+void addRoute(char *path, NeroWindow *(*callback)()) {
+    routePaths[0] = path;
+    routeControllers[0] = callback;
+    used_cells = 1;
+}
 
 /**
  * Register routes
  * */
 void registerRoutes() {
-    struct MainWin* (*index_callback)() = main_run;
-
-    route_names[0] = "/main";
-    route_calls[0] = index_callback;
-
-    used_cells = 1;
+    addRoute("/main", main_run);
 }
-
 
 /**
  * Look for route and call matched route. Return Null otherwise
  * */
-struct MainWin* matchRoute(const char *route) {
+NeroWindow *matchRoute(const char *route) {
     for (int i = 0; i < used_cells; i++) {
-        if(strcasecmp(route, route_names[i]) == 0) {
-            return route_calls[i]();
+        if (strcasecmp(route, routePaths[i]) == 0) {
+            return routeControllers[i]();
         }
     }
 

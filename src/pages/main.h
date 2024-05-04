@@ -2,9 +2,9 @@
 #include <X11/Xlib.h>
 #include "../config/config.h"
 
-#ifndef FIRST_PROJECT_INDEX_H
-#define FIRST_PROJECT_INDEX_H
+#ifndef NERO_PAGES_MAIN_H
+#define NERO_PAGES_MAIN_H
 
-struct MainWin* main_run();
+NeroWindow *main_run();
 
-#endif //FIRST_PROJECT_INDEX_H
+#endif //NERO_PAGES_MAIN_H
