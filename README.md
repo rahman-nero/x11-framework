@@ -1,6 +1,6 @@
 ### Introduction
 
-> Under development. Doesn't recommend using
+> Under development. Don't recommend using
 
 The framework provides with easy API for building application on X11.
 
