@@ -1,6 +1,6 @@
 #include <string.h>
 #include <err.h>
-#include "../pages/main.h"
+#include "../pages/index.h"
 #include "../config/config.h"
 
 typedef NeroWindow *(*FunctionCallback)();

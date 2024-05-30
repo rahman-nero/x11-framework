@@ -4,3 +4,4 @@ xwindow
 src/utils/*.o
 src/pages/*.o
 src/config/*.o
+/src/store/state.o
