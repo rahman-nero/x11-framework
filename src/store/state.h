@@ -1,5 +1,4 @@
 #include <inttypes.h>
-#include <malloc.h>
 
 #ifndef NERO_CONFIG_STATE_H
 #define NERO_CONFIG_STATE_H

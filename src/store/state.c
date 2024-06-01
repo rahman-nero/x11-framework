@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "state.h"
 
 extern uint8_t stateGotUpdated;
@@ -16,7 +18,6 @@ State *createState(uint8_t value) {
         stateList->list[stateList->length] = state;
         stateList->length += 1;
     }
-
 
     printf("Create State called, %d \n", stateList->length);
 

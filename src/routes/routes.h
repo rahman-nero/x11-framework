@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../config/config.h"
-
+#include "../window.h"
 
 #ifndef NERO_CONFIG_ROUTE_H
 #define NERO_CONFIG_ROUTE_H

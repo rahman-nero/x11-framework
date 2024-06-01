@@ -1,19 +1,11 @@
-#include "../utils/utils.h"
-#include "../config/config.h"
-#include "../store/state.h"
-#include <string.h>
-
-extern NeroConfig config;
+#include "../../src/window.h"
+#include "../../src/store/state.h"
 
 State *st = NULL;
 
-NeroWindow *main_run() {
-
-//    printf("State value %d\n", st->value);
-
-    // Init state
+NeroWindow *index_run() {
     if (st == NULL) {
-        st = createState(100);
+        st = createState(0);
     }
 
     // Header
@@ -84,7 +76,6 @@ NeroWindow *main_run() {
     subWindowString2->string = newString;
     subWindowString2->length = 10;
     subSubSubWindow->string = subWindowString2;
-
 
     subWindow->subWindows[0] = subSubWindow;
     subWindow->subWindowSize = 1;

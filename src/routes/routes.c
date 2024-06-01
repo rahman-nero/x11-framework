@@ -1,7 +1,7 @@
 #include <string.h>
 #include <err.h>
-#include "../pages/index.h"
-#include "../config/config.h"
+#include "../../application/pages/index.h"
+#include "../window.h"
 
 typedef NeroWindow *(*FunctionCallback)();
 
@@ -25,7 +25,7 @@ void addRoute(char *path, NeroWindow *(*callback)()) {
  * Register routes
  * */
 void registerRoutes() {
-    addRoute("/main", main_run);
+    addRoute("/main", index_run);
 }
 
 /**
