@@ -40,8 +40,26 @@ To run this application:
 
 ### TODO
 
-- [ ] Ability to move between routes
+Features:
 - [x] Ability to handle clicks on buttons
-- [ ] Ability to handle keyboard
-- [ ] Adding Garbage collector
+- [x] Ability to handle keyboard
+- [x] Local state
+- [ ] Global state so that different pages could mutate one global state 
+- [ ] Ability to move between routes when clicked
+- [ ] Ability to handle multiple events (keyboard, clicks)
+- [ ] Ability to listen to Focus/MouseOver etc events
+- [ ] Text output
+  - [ ] Ability to change text color (Must create GC separately for each windows with text)
+  - [ ] Ability to change fonts
+  - [ ] Ability to change size etc
+- [ ] Somehow implement scrolling
+- [ ] Support UTF8 
+- [ ] Implement
+    - [ ] form input tag
+    - [ ] image tag (icons as well)
+    - [ ] video tag (gonna be hard)
+    - [ ] audio tag (gonna be hard)
+
+Must do:
+- [ ] Implement Garbage collector
 - [ ] Free all resource at the end

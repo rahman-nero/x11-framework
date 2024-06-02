@@ -20,6 +20,6 @@ typedef struct {
 /**
  * Creating a new string
  * */
-NeroString *NeroStringNew(const uint16_t x, const uint16_t y, char *string, uint16_t length);
+NeroString *NeroStringNew(uint16_t x, uint16_t y, char *string, uint16_t length);
 
 #endif

@@ -25,7 +25,7 @@ NeroWindow *currentView;
 StateList *stateList;
 uint8_t stateGotUpdated;
 
-// Event
+// Events
 NeroWindow *windowsWithEvents[127];
 uint8_t windowsWithEventsLength = 0;
 
@@ -61,21 +61,7 @@ void *eventHandler() {
                             windowsWithEvents[i]->event->callback(ev);
                         }
                     }
-                }
 
-                // Click left button on mouse
-                if (ev.xbutton.button == Button1) {
-                    printf("Button1 \n");
-                }
-
-                // Click on middle scroll on mouse
-                if (ev.xbutton.button == Button2) {
-                    printf("Button2 \n");
-                }
-
-                // Click right button on mouse
-                if (ev.xbutton.button == Button3) {
-                    printf("Button3 \n");
                 }
                 break;
 
@@ -170,6 +156,7 @@ int main() {
     config.vis = DefaultVisual(config.dpy, config.scr);
     config.displayWidth = DisplayWidth(config.dpy, config.scr);
     config.displayHeight = DisplayHeight(config.dpy, config.scr);
+    config.colormap = DefaultColormap(config.dpy, config.scr);
 
     // Creating queue
     stringRenderQueue = StringRenderQueueNew();

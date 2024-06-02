@@ -9,6 +9,8 @@
 
 #define ClickEvent "click"
 #define KeyboardEvent "keyboard"
+#define XCenter(mainWinWidth, subWindowWidth) (mainWinWidth / 2) - subWindowWidth / 2
+#define YCenter(mainWinHeight, subWindowHeight) (mainWinHeight / 2) - subWindowHeight / 2
 
 typedef unsigned long NeroBorderColor;
 typedef unsigned long NeroBackgroundColor;
@@ -29,6 +31,9 @@ typedef struct {
 
     // Visual
     Visual *vis;
+
+    // Colormap
+    Colormap colormap;
 
     // Main Win
     Window mainWin;

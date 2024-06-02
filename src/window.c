@@ -115,11 +115,14 @@ void changeWindowBackground(const Window window, const char *hex) {
     }
 
     // Assign hex color to allocated memory
-    if (!XftColorAllocName(config.dpy, config.vis, DefaultColormap(config.dpy, config.scr), hex, color)) {
+    if (!XftColorAllocName(config.dpy, config.vis, config.colormap, hex, color)) {
         errx(1, "Can't allocate xft color");
     }
 
     XSetWindowBackground(config.dpy, window, color->pixel);
+
+    free(color);
+    XftColorFree(config.dpy, config.vis, config.colormap, color);
 }
 
 
