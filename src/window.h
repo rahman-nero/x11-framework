@@ -7,9 +7,15 @@
 #ifndef NERO_SRC_WINDOW_H
 #define NERO_SRC_WINDOW_H
 
+#define ClickEvent "click"
+#define KeyboardEvent "keyboard"
+
 typedef unsigned long NeroBorderColor;
 typedef unsigned long NeroBackgroundColor;
 typedef unsigned long NeroStringColor;
+
+typedef void (*EventCallback)(XEvent event);
+
 
 typedef struct {
     // Display server connection
@@ -53,14 +59,22 @@ typedef struct {
     uint16_t height;
 
     // Border
-    uint8_t border_width;
+    uint8_t borderWidth;
 
     // Border color (RGB). Example: 0x00FFFFFF - white
-    NeroBorderColor border_color;
+    NeroBorderColor borderColor;
 
     // Background color based on RGB. Example: 0x00FF0000 - red
     NeroBackgroundColor background;
 } NeroWindowConfig;
+
+typedef struct {
+    // Type of event (click or keyboard)
+    char *type;
+
+    // Callback
+    EventCallback callback;
+} NeroEventListener;
 
 typedef struct NeroWindow {
     // Filled when window has been created
@@ -78,34 +92,17 @@ typedef struct NeroWindow {
     // Sub windows
     struct NeroWindow *subWindows[127];
 
-    // Count of windows
+    // Quantity of subwindows
     uint8_t subWindowSize;
+
+    // Event listener
+    NeroEventListener *event;
 } NeroWindow;
 
 typedef struct {
     NeroWindow *queue[127];
     uint8_t length;
 } StringRenderQueue;
-
-/**
- * Constructor of StringRenderQueue
- * */
-StringRenderQueue *StringRenderQueueNew();
-
-/**
- * Add a window to queue
- * */
-void StringRenderQueueAddWindow(StringRenderQueue *object, NeroWindow *window);
-
-/**
- * Remove value by index and shift array
- * */
-void StringRenderQueueFreeByIndex(StringRenderQueue *object, uint8_t index);
-
-/**
- * Free all elements from queue
- * */
-void StringRenderQueueFreeQueue(StringRenderQueue *object);
 
 /**
  * Recursive mapping windows
@@ -137,11 +134,63 @@ Window createWindow(
  * @param Window* window
  * @param char* hex
  * */
-void changeWindowBackground(const Window window, const char *hex);
+void changeWindowBackground(Window window, const char *hex);
 
 /**
  * Create Graphic Context
  * */
-GC createGc(const Window window);
+GC createGc(Window window);
+
+
+/**
+ * Constructor of StringRenderQueue
+ * */
+StringRenderQueue *StringRenderQueueNew();
+
+/**
+ * Add a window to queue
+ * */
+void StringRenderQueueAddWindow(StringRenderQueue *object, NeroWindow *window);
+
+/**
+ * Remove value by index and shift array
+ * */
+void StringRenderQueueFreeByIndex(StringRenderQueue *object, uint8_t index);
+
+/**
+ * Free all elements from queue
+ * */
+void StringRenderQueueFreeQueue(StringRenderQueue *object);
+
+/**
+ * Constructor of NeroWindow
+ * */
+NeroWindow *NeroWindowNew(
+        uint16_t width,
+        uint16_t height,
+        uint16_t x,
+        uint16_t y,
+        NeroBackgroundColor background,
+        uint8_t borderWidth,
+        NeroBorderColor borderColor,
+        NeroString *string,
+        NeroEventListener *event
+);
+
+/**
+ * Adding subwindow to the window
+ * */
+void NeroWindowAddSubWindow(NeroWindow *window, NeroWindow *subWindow);
+
+/**
+ * Constructor of NeroEventListener
+ * */
+NeroEventListener *newEventListener(char *type, EventCallback callback);
+
+/**
+ * Recursive collect of events from windows and subwindows
+ * */
+void recursiveCollectWindowsWithEvents(NeroWindow *currentWin, NeroWindow* windowsWithEvents[],
+                                       uint8_t *windowsWithEventsLength);
 
 #endif //NERO_SRC_WINDOW_H

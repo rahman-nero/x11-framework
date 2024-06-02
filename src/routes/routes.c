@@ -15,7 +15,7 @@ size_t routeCount = 0;
  * @param Callback callback
  * @return void
  * */
-void addRoute(char *path, NeroWindow *(*callback)()) {
+void addRoute(char *path, FunctionCallback callback) {
     routePaths[routeCount] = path;
     routeControllers[routeCount] = callback;
     routeCount += 1;

@@ -21,7 +21,7 @@ void recursiveMapWindows(NeroWindow *currentWin, const Window parent) {
             currentWin->config.y,
             currentWin->config.width,
             currentWin->config.height,
-            currentWin->config.border_width,
+            currentWin->config.borderWidth,
             0,
             currentWin->config.background
     );
@@ -89,6 +89,14 @@ Window createWindow(
                         CWBackPixel | CWEventMask | CWBorderPixel, &windowAttributes);
 
     return win;
+}
+
+/**
+ * Adding subwindow to the window
+ * */
+void NeroWindowAddSubWindow(NeroWindow *window, NeroWindow *subWindow) {
+    window->subWindows[window->subWindowSize] = subWindow;
+    window->subWindowSize += 1;
 }
 
 /**
@@ -186,6 +194,78 @@ void StringRenderQueueFreeQueue(StringRenderQueue *object) {
         object->queue[i] = 0;
     }
     object->length = 0;
+}
+
+
+/**
+ * Constructor of NeroWindow
+ * */
+NeroWindow *NeroWindowNew(
+        const uint16_t width,
+        const uint16_t height,
+        const uint16_t x,
+        const uint16_t y,
+        const NeroBackgroundColor background,
+        const uint8_t borderWidth,
+        const NeroBorderColor borderColor,
+        NeroString *string,
+        NeroEventListener *event
+) {
+
+    NeroWindow *new = (NeroWindow *) malloc(sizeof(NeroWindow));
+
+    new->config.width = width;
+    new->config.height = height;
+    new->config.x = x;
+    new->config.y = y;
+    new->config.borderWidth = borderWidth;
+    new->config.borderColor = borderColor;
+    new->event = event;
+    new->config.background = background;
+    new->string = string;
+    new->subWindowSize = 0;
+
+    return new;
+}
+
+/**
+ * Constructor of NeroEventListener
+ * */
+NeroEventListener *newEventListener(char *type, EventCallback callback) {
+    NeroEventListener *new = (NeroEventListener *) malloc(sizeof(NeroEventListener));
+
+    if (type == NULL) {
+        errx(1, "Type of event has to be filled");
+    }
+
+    // Checking type of event
+    if (strcmp(type, ClickEvent) == 0 || strcmp(type, KeyboardEvent) == 0) {
+    }
+
+    new->type = type;
+    new->callback = callback;
+
+    return new;
+}
+
+
+/**
+ * Recursively collecting events from windows and its subwindows
+ * */
+void recursiveCollectWindowsWithEvents(NeroWindow *currentWin, NeroWindow *windowsWithEvents[],
+                                       uint8_t *windowsWithEventsLength) {
+
+    if (currentWin->event != NULL) {
+        windowsWithEvents[*windowsWithEventsLength] = currentWin;
+        *windowsWithEventsLength += 1;
+    }
+
+    // Calling function again if there is subWindows
+    if (currentWin->subWindowSize > 0) {
+        for (int i = 0; i < currentWin->subWindowSize; i++) {
+            recursiveCollectWindowsWithEvents(currentWin->subWindows[i], windowsWithEvents, windowsWithEventsLength);
+        }
+    }
 }
 
 

@@ -12,12 +12,22 @@
 
 #define TITLE "Application"
 
+// Main config
 NeroConfig config;
+
+// Holds texts that needs to be drawn
 StringRenderQueue *stringRenderQueue;
+
+// Result of matched route's controller
 NeroWindow *currentView;
 
-uint8_t stateGotUpdated;
+// State
 StateList *stateList;
+uint8_t stateGotUpdated;
+
+// Event
+NeroWindow *windowsWithEvents[127];
+uint8_t windowsWithEventsLength = 0;
 
 void run() {
     // Current route
@@ -26,7 +36,13 @@ void run() {
     // Result of matching route
     currentView = matchRoute(route);
 
+    // Recursive mapping windows
     recursiveMapWindows(currentView, config.mainWin);
+
+    // Recursive collection windows
+    recursiveCollectWindowsWithEvents(currentView, windowsWithEvents, &windowsWithEventsLength);
+
+    printf("Events : %d\n", windowsWithEventsLength);
 }
 
 void *eventHandler() {
@@ -35,6 +51,17 @@ void *eventHandler() {
     while (XNextEvent(config.dpy, &ev) == 0) {
         switch (ev.type) {
             case ButtonPress:
+
+                // If there is registered event from window
+                if (windowsWithEventsLength > 0) {
+                    for (int i = 0; i < windowsWithEventsLength; ++i) {
+                        // Check if it is Click event
+                        if (ev.xany.window == windowsWithEvents[i]->window &&
+                            strcmp(windowsWithEvents[i]->event->type, ClickEvent) == 0) {
+                            windowsWithEvents[i]->event->callback(ev);
+                        }
+                    }
+                }
 
                 // Click left button on mouse
                 if (ev.xbutton.button == Button1) {
@@ -57,10 +84,14 @@ void *eventHandler() {
                     return NULL;
                 }
 
-                if (XkbKeycodeToKeysym(config.dpy, ev.xkey.keycode, 0, 0) == XK_t) {
-                    for (int i = 0; i < stateList->length; ++i) {
-                        printf("State: %d\n", stateList->list[i]->value + 1);
-                        updateState(stateList->list[i], stateList->list[i]->value + 1);
+                // If there is registered event from window
+                if (windowsWithEventsLength > 0) {
+                    for (int i = 0; i < windowsWithEventsLength; ++i) {
+                        // Check if it is Click event
+                        if (ev.xany.window == windowsWithEvents[i]->window &&
+                            strcmp(windowsWithEvents[i]->event->type, KeyboardEvent) == 0) {
+                            windowsWithEvents[i]->event->callback(ev);
+                        }
                     }
                 }
 
@@ -103,6 +134,9 @@ void *stateUpdateHandler() {
 
             // Unmapping all windows with subwindows and freeing them
             recursiveUnmapWindows(currentView);
+
+            // Resetting events
+            windowsWithEventsLength = 0;
 
             // Regenerating windows again
             run();
@@ -179,10 +213,10 @@ int main() {
     XFreeFont(dpy, font);
     XFreeGC(dpy, config.gc);
     free(stringRenderQueue);
+    free(currentView);
 
     // Close connection with display
     XCloseDisplay(dpy);
-
 
     return 0;
 }

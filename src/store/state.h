@@ -4,7 +4,7 @@
 #define NERO_CONFIG_STATE_H
 
 typedef struct {
-    uint8_t value;
+    uint64_t value;
 } State;
 
 typedef struct {
@@ -12,17 +12,14 @@ typedef struct {
     uint8_t length;
 } StateList;
 
-extern uint8_t stateGotUpdated;
-extern StateList* stateList;
-
 /**
  * Creating a new state
  * */
-State *createState(uint8_t value);
+State *createState(uint64_t value);
 
 /**
  * Updating state
  * */
-void updateState(State *state, uint8_t value);
+void updateState(State *state, uint64_t  value);
 
 #endif

@@ -3,12 +3,12 @@
 #include "state.h"
 
 extern uint8_t stateGotUpdated;
-extern StateList* stateList;
+extern StateList *stateList;
 
 /**
  * Creating a new state
  * */
-State *createState(uint8_t value) {
+State *createState(uint64_t value) {
     State *state = (State *) malloc(sizeof(State));
 
     if (stateList->length == 0) {
@@ -28,7 +28,7 @@ State *createState(uint8_t value) {
 /**
  * Updating state
  * */
-void updateState(State *state, uint8_t value) {
-    stateGotUpdated = 1;
+void updateState(State *state, uint64_t value) {
     state->value = value;
+    stateGotUpdated = 1;
 }

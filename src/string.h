@@ -17,4 +17,9 @@ typedef struct {
     uint16_t length;
 } NeroString;
 
+/**
+ * Creating a new string
+ * */
+NeroString *NeroStringNew(const uint16_t x, const uint16_t y, char *string, uint16_t length);
+
 #endif

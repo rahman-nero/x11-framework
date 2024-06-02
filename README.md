@@ -41,7 +41,7 @@ To run this application:
 ### TODO
 
 - [ ] Ability to move between routes
-- [ ] Ability to handle clicks on buttons
+- [x] Ability to handle clicks on buttons
 - [ ] Ability to handle keyboard
 - [ ] Adding Garbage collector
 - [ ] Free all resource at the end
