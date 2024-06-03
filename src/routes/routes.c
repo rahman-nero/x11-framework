@@ -7,7 +7,7 @@ typedef NeroWindow *(*FunctionCallback)();
 
 const char *routePaths[10];
 FunctionCallback routeControllers[10];
-size_t routeCount = 0;
+int routeCount = 0;
 
 /**
  * Function to add route to route list

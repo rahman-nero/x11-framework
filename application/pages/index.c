@@ -18,13 +18,13 @@ uint16_t getUpTime() {
     return atoi(time);
 }
 
-void windowEventListener(XEvent event) {
+void windowEventListener() {
+
     if (isModal->value == 0) {
         updateState(isModal, 1);
 
     } else {
         updateState(isModal, 0);
-
     }
 }
 
@@ -60,9 +60,14 @@ NeroWindow *index_run() {
                                                 NULL);
 
     /// Center Section
-    NeroWindow *centerMainWin = NeroWindowNew(1920, 400, 0, 80, 0x00ffa409, 0, 0, NULL, NULL);
+    NeroWindow *centerMainWin = NeroWindowNew(1920, 1024, 0, 80, 0x00FFFFFF, 0, 0, NULL, NULL);
+
+
+    char *strings = malloc(100 * sizeof (char));
+    strings = "/home/nero/HDD/Desktop/2.jpg";
 
     if (isModal->value == 1) {
+        centerMainWin->image = NeroImageNew(100, 100, strings);
         NeroWindowAddSubWindow(root, centerMainWin);
     }
 

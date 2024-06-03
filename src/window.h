@@ -81,9 +81,24 @@ typedef struct {
     EventCallback callback;
 } NeroEventListener;
 
+
+typedef struct {
+    // Filename
+    char *filename;
+
+    // Weight
+    uint16_t width;
+
+    // Height
+    uint16_t height;
+} NeroImage;
+
 typedef struct NeroWindow {
     // Filled when window has been created
     Window window;
+
+    // Image
+    GC gc;
 
     // Config
     NeroWindowConfig config;
@@ -102,12 +117,15 @@ typedef struct NeroWindow {
 
     // Event listener
     NeroEventListener *event;
+
+    // Image
+    NeroImage *image;
 } NeroWindow;
 
 typedef struct {
     NeroWindow *queue[127];
     uint8_t length;
-} StringRenderQueue;
+} RenderQueue;
 
 /**
  * Recursive mapping windows
@@ -146,26 +164,25 @@ void changeWindowBackground(Window window, const char *hex);
  * */
 GC createGc(Window window);
 
-
 /**
- * Constructor of StringRenderQueue
+ * Constructor of RenderQueue
  * */
-StringRenderQueue *StringRenderQueueNew();
+RenderQueue *RenderQueueNew();
 
 /**
  * Add a window to queue
  * */
-void StringRenderQueueAddWindow(StringRenderQueue *object, NeroWindow *window);
+void RenderQueueAddWindow(RenderQueue *object, NeroWindow *window);
 
 /**
  * Remove value by index and shift array
  * */
-void StringRenderQueueFreeByIndex(StringRenderQueue *object, uint8_t index);
+void RenderQueueFreeByIndex(RenderQueue *object, uint8_t index);
 
 /**
  * Free all elements from queue
  * */
-void StringRenderQueueFreeQueue(StringRenderQueue *object);
+void RenderQueueFreeQueue(RenderQueue *object);
 
 /**
  * Constructor of NeroWindow
@@ -193,9 +210,14 @@ void NeroWindowAddSubWindow(NeroWindow *window, NeroWindow *subWindow);
 NeroEventListener *newEventListener(char *type, EventCallback callback);
 
 /**
+ * Constructor of NeroImage
+ * */
+NeroImage *NeroImageNew(uint16_t width, uint16_t height, char *filename);
+
+/**
  * Recursive collect of events from windows and subwindows
  * */
-void recursiveCollectWindowsWithEvents(NeroWindow *currentWin, NeroWindow* windowsWithEvents[],
+void recursiveCollectWindowsWithEvents(NeroWindow *currentWin, NeroWindow *windowsWithEvents[],
                                        uint8_t *windowsWithEventsLength);
 
 #endif //NERO_SRC_WINDOW_H

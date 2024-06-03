@@ -7,7 +7,8 @@
 #include "window.h"
 
 extern NeroConfig config;
-extern StringRenderQueue *stringRenderQueue;
+extern RenderQueue *stringRenderQueue;
+extern RenderQueue *imageRenderQueue;
 
 /**
  * Recursive mapping windows
@@ -30,9 +31,19 @@ void recursiveMapWindows(NeroWindow *currentWin, const Window parent) {
     // Mapping window
     XMapWindow(config.dpy, win);
 
+    // Creating GC if there is something that needs to be drawn
+    if (currentWin->string != NULL || currentWin->image != NULL) {
+        currentWin->gc = createGc(currentWin->window);
+    }
+
     // If there is a text that needs to be shown, we add it to queue
     if (currentWin->string != NULL) {
-        StringRenderQueueAddWindow(stringRenderQueue, currentWin);
+        RenderQueueAddWindow(stringRenderQueue, currentWin);
+    }
+
+    // If there is a text that needs to be shown, we add it to queue
+    if (currentWin->image != NULL) {
+        RenderQueueAddWindow(imageRenderQueue, currentWin);
     }
 
     // Calling function again if there is subWindows
@@ -121,8 +132,8 @@ void changeWindowBackground(const Window window, const char *hex) {
 
     XSetWindowBackground(config.dpy, window, color->pixel);
 
-    free(color);
     XftColorFree(config.dpy, config.vis, config.colormap, color);
+    free(color);
 }
 
 
@@ -153,10 +164,10 @@ GC createGc(const Window window) {
 
 
 /**
- * Constructor of StringRenderQueue
+ * Constructor of RenderQueue
  * */
-StringRenderQueue *StringRenderQueueNew() {
-    StringRenderQueue *object = (StringRenderQueue *) malloc(sizeof(StringRenderQueue));
+RenderQueue *RenderQueueNew() {
+    RenderQueue *object = (RenderQueue *) malloc(sizeof(RenderQueue));
     object->length = 0;
 
     return object;
@@ -165,7 +176,7 @@ StringRenderQueue *StringRenderQueueNew() {
 /**
  * Add a window to queue
  * */
-void StringRenderQueueAddWindow(StringRenderQueue *object, NeroWindow *window) {
+void RenderQueueAddWindow(RenderQueue *object, NeroWindow *window) {
     object->queue[object->length] = window;
     object->length += 1;
 }
@@ -173,7 +184,7 @@ void StringRenderQueueAddWindow(StringRenderQueue *object, NeroWindow *window) {
 /**
  * Remove value by index and shift array
  * */
-void StringRenderQueueFreeByIndex(StringRenderQueue *object, uint8_t index) {
+void RenderQueueFreeByIndex(RenderQueue *object, uint8_t index) {
     // Checking if index is not out of array
     if (index >= object->length) {
         return;
@@ -192,7 +203,7 @@ void StringRenderQueueFreeByIndex(StringRenderQueue *object, uint8_t index) {
 /**
  * Free all elements from queue
  * */
-void StringRenderQueueFreeQueue(StringRenderQueue *object) {
+void RenderQueueFreeQueue(RenderQueue *object) {
     for (int i = 0; i < object->length; ++i) {
         object->queue[i] = 0;
     }
@@ -227,6 +238,7 @@ NeroWindow *NeroWindowNew(
     new->config.background = background;
     new->string = string;
     new->subWindowSize = 0;
+    new->image = NULL;
 
     return new;
 }
@@ -251,6 +263,23 @@ NeroEventListener *newEventListener(char *type, EventCallback callback) {
     return new;
 }
 
+/**
+ * Constructor of NeroImage
+ * */
+NeroImage *NeroImageNew(
+        const uint16_t width,
+        const uint16_t height,
+        char filename[]
+) {
+    NeroImage *new = (NeroImage *) malloc(sizeof(NeroImage));
+
+    new->width = width;
+    new->height = height;
+    new->filename = filename;
+
+    return new;
+}
+
 
 /**
  * Recursively collecting events from windows and its subwindows
@@ -270,5 +299,6 @@ void recursiveCollectWindowsWithEvents(NeroWindow *currentWin, NeroWindow *windo
         }
     }
 }
+
 
 

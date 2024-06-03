@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "stb_image.h"
 #include <X11/X.h>
 #include <err.h>
 #include <stdio.h>
@@ -16,7 +19,10 @@
 NeroConfig config;
 
 // Holds texts that needs to be drawn
-StringRenderQueue *stringRenderQueue;
+RenderQueue *stringRenderQueue;
+
+// Holds images that needs to be drawn
+RenderQueue *imageRenderQueue;
 
 // Result of matched route's controller
 NeroWindow *currentView;
@@ -43,6 +49,31 @@ void run() {
     recursiveCollectWindowsWithEvents(currentView, windowsWithEvents, &windowsWithEventsLength);
 
     printf("Events : %d\n", windowsWithEventsLength);
+}
+
+void show_image(NeroWindow *window) {
+    int width, height, channels;
+    unsigned char *img = stbi_load(window->image->filename, &width, &height, &channels, 4);
+    if (img == NULL) {
+        fprintf(stderr, "Error loading image: %s\n", window->image->filename);
+        return;
+    }
+
+    XImage *ximage = XCreateImage(config.dpy, config.vis, DefaultDepth(config.dpy, config.scr), ZPixmap, 0,
+                                  (char *) img, width,
+                                  height, 32, 0);
+    if (ximage == NULL) {
+        fprintf(stderr, "Error creating XImage\n");
+        stbi_image_free(img);
+        return;
+    }
+
+    XPutImage(config.dpy, window->window, window->gc, ximage, 0, 0, 0, 0, width, height);
+
+//     Free resources
+    ximage->data = NULL;  // Prevent XDestroyImage from freeing the image data
+    XDestroyImage(ximage);
+    stbi_image_free(img);
 }
 
 void *eventHandler() {
@@ -85,6 +116,7 @@ void *eventHandler() {
 
             case Expose:
                 Window exposedWindow = ev.xany.window;
+
                 if (stringRenderQueue->length > 0) {
                     for (size_t i = 0; i < stringRenderQueue->length; i++) {
                         // Selected window
@@ -102,10 +134,26 @@ void *eventHandler() {
                             );
 
                             // Remove after rendering
-                            StringRenderQueueFreeByIndex(stringRenderQueue, i);
+                            RenderQueueFreeByIndex(stringRenderQueue, i);
                         }
                     }
                 }
+
+                if (imageRenderQueue->length > 0) {
+                    for (size_t i = 0; i < imageRenderQueue->length; i++) {
+                        // Selected window
+                        NeroWindow *matchedWindow = imageRenderQueue->queue[i];
+
+                        // If exposed window and selected window is equal, then draw text
+                        if (exposedWindow == matchedWindow->window) {
+                            show_image(matchedWindow);
+
+                            // Remove after rendering
+                            RenderQueueFreeByIndex(imageRenderQueue, i);
+                        }
+                    }
+                }
+
                 break;
         }
     }
@@ -159,7 +207,10 @@ int main() {
     config.colormap = DefaultColormap(config.dpy, config.scr);
 
     // Creating queue
-    stringRenderQueue = StringRenderQueueNew();
+    stringRenderQueue = RenderQueueNew();
+
+    // Creating queue
+    imageRenderQueue = RenderQueueNew();
 
     // Register Routes
     registerRoutes();

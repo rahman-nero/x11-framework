@@ -10,8 +10,8 @@ SRC = $(wildcard *.c $(PREF_SRC)*.c $(PREF_APPLICATION_PAGES)*.c $(PREF_SRC_STOR
 OBJ = ${SRC:.c=.o}
 
 CC = gcc
-INCS = -l/usr/include/X11 `pkg-config --cflags xft` -lc
-LIBS = -lX11 -lXft -lpthread -lc
+INCS = -l/usr/include/X11 `pkg-config --cflags xft`
+LIBS = -lX11 -lXft -lpthread -lm -lc
 
 LDFLAGS = ${LIBS}
 CFLAGS = -Wall -Wextra ${INCS}
